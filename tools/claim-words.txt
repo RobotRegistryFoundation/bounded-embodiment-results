@@ -1,0 +1,20 @@
+# Claim words. tools/claim_lint.py flags each entry below, case-insensitively
+# and as a whole word, in report.json string values and in NOTES.md.
+# One word or phrase per line; lines starting with # are comments.
+# "safety" on its own is allowed: whole-word matching means "safe" does not
+# match "safety" (or "unsafe", or "safely").
+certified
+certification
+compliant
+compliance
+conformant
+conformance
+approved
+endorsed
+endorsement
+accredited
+guaranteed
+safe
+BE-1
+BE-2
+BE-3

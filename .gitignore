@@ -1,0 +1,8 @@
+# Built by tools/build_table.py; published by the pages workflow, never committed.
+site/
+__pycache__/
+.pytest_cache/
+*.pyc
+# Local files from the submission steps: never commit a keyring or a private key.
+keyring.json
+*.key.json

@@ -1,0 +1,174 @@
+# Checks a pull request that submits results, withdraws one, or registers or
+# changes a lab. Green means "consistent", never "passed".
+#
+# It runs on pull_request (never pull_request_target) with a read-only token
+# and no secrets. A pull_request run uses the workflow file from the pull
+# request itself, so this file cannot protect itself: code-owner review does
+# (see .github/CODEOWNERS and README.md). So that a pull request editing tools/
+# cannot change what is checked, every job runs the tools, kits.lock and the
+# claim-word list from main, not from the pull request. All checking of reports
+# is done by `be verify`, from the core wheel pinned in kits.lock.
+name: verify
+
+on:
+  pull_request:
+    branches: [main]
+
+# Read-only for every job: CI reads the pull request and main, and writes nothing.
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  path-guard:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      kind: ${{ steps.guard.outputs.kind }}
+      lab: ${{ steps.guard.outputs.lab }}
+      scope: ${{ steps.guard.outputs.scope }}
+      run_dirs: ${{ steps.guard.outputs.run_dirs }}
+      withdrawals: ${{ steps.guard.outputs.withdrawals }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Take the tools from main
+        run: git worktree add --detach "$RUNNER_TEMP/base" origin/main
+      - name: Path guard (git diff origin/main...HEAD)
+        id: guard
+        run: python3 "$RUNNER_TEMP/base/tools/path_guard.py" --base origin/main --github-output "$GITHUB_OUTPUT"
+
+  identity:
+    needs: path-guard
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      keyring: ${{ steps.identity.outputs.keyring }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Take the tools from main
+        run: git worktree add --detach "$RUNNER_TEMP/base" origin/main
+      - name: Author and keys from labs/<lab>/lab.json on main
+        id: identity
+        env:
+          SCOPE: ${{ needs.path-guard.outputs.scope }}
+          # The pull request's author, not github.actor: a maintainer pushing to
+          # the branch must not change whose lab this is.
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: >-
+          python3 "$RUNNER_TEMP/base/tools/identity.py" "$SCOPE"
+          --base origin/main --author "$PR_AUTHOR" --github-output "$GITHUB_OUTPUT"
+
+  be-verify:
+    needs: [path-guard, identity]
+    if: needs.path-guard.outputs.kind == 'results' && needs.path-guard.outputs.run_dirs != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    outputs:
+      flags: ${{ steps.verify.outputs.flags }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Take the tools from main
+        run: git worktree add --detach "$RUNNER_TEMP/base" origin/main
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: be verify each run under the core version its report names
+        id: verify
+        env:
+          RUN_DIRS: ${{ needs.path-guard.outputs.run_dirs }}
+          KEYRING: ${{ needs.identity.outputs.keyring }}
+        run: |
+          set -euo pipefail
+          base="$RUNNER_TEMP/base"
+          keys="$RUNNER_TEMP/keyring.json"
+          out="$RUNNER_TEMP/be-verify"
+          printf '%s' "$KEYRING" > "$keys"
+          mkdir -p "$out"
+          status=0
+          read -ra dirs <<< "$RUN_DIRS"
+          for dir in "${dirs[@]}"; do
+            echo "::group::$dir"
+            # Refuses any version that is not a release listed in kits.lock.
+            if ! version="$(python3 "$base/tools/pin_core.py" --lock "$base/kits.lock" --run-dir "$dir" --out "$RUNNER_TEMP/core-requirements.txt")"; then
+              status=1
+              echo "::endgroup::"
+              continue
+            fi
+            venv="$RUNNER_TEMP/core-$version"
+            if [ ! -x "$venv/bin/be" ]; then
+              python -m venv "$venv"
+              # kits.lock pins the core wheel only, and --require-hashes needs a hash for every
+              # package it installs: so the core goes in alone, hash-checked, then its
+              # dependencies from PyPI within the core's own declared ranges.
+              "$venv/bin/python" -m pip install --quiet --disable-pip-version-check \
+                --no-deps --only-binary :all: --require-hashes -r "$RUNNER_TEMP/core-requirements.txt"
+              "$venv/bin/python" -m pip install --quiet --disable-pip-version-check \
+                --only-binary :all: "bounded-embodiment==$version"
+            fi
+            id="${dir#results/}"
+            result="$out/${id//\//__}.json"
+            if "$venv/bin/be" verify "$dir" --keys "$keys" --json > "$result"; then
+              echo "be verify: consistent under core $version"
+            else
+              echo "be verify: not consistent under core $version"
+              status=1
+            fi
+            cat "$result"
+            echo "::endgroup::"
+          done
+          python3 "$base/tools/summary.py" flags "$out" >> "$GITHUB_OUTPUT"
+          exit "$status"
+
+  claim-lint:
+    needs: path-guard
+    if: needs.path-guard.outputs.kind == 'results' && needs.path-guard.outputs.run_dirs != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Take the tools from main
+        run: git worktree add --detach "$RUNNER_TEMP/base" origin/main
+      - name: Claim-language lint (report.json and NOTES.md)
+        env:
+          RUN_DIRS: ${{ needs.path-guard.outputs.run_dirs }}
+        run: |
+          read -ra dirs <<< "$RUN_DIRS"
+          python3 "$RUNNER_TEMP/base/tools/claim_lint.py" --words "$RUNNER_TEMP/base/tools/claim-words.txt" "${dirs[@]}"
+
+  # The one check branch protection requires. It always runs, and it is green
+  # only when every check this pull request needs succeeded.
+  submission-consistency:
+    needs: [path-guard, identity, be-verify, claim-lint]
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Take the tools from main
+        run: git worktree add --detach "$RUNNER_TEMP/base" origin/main
+      - name: Summary
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: python3 "$RUNNER_TEMP/base/tools/summary.py" render --out "$GITHUB_STEP_SUMMARY"

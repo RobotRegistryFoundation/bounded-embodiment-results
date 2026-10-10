@@ -1,0 +1,4 @@
+# Result files are hashed and signed byte for byte, so git must never convert
+# their line endings (for example with core.autocrlf on Windows).
+results/** -text
+labs/** -text

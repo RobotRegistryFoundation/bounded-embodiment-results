@@ -1,0 +1,21 @@
+# Every path below needs the maintainer's review: branch protection requires
+# code-owner review. A pull_request run uses the pull request's own workflow
+# file, so this review, not CI, is what protects the workflows and the tools.
+# Result pull requests (results/<lab>/ only) are merged by the maintainer too,
+# and only when every changed path is inside results/<lab>/.
+
+/.github/            @craigm26
+/tools/              @craigm26
+/kits.lock           @craigm26
+/POLICY.md           @craigm26
+/CODEOWNERS          @craigm26
+/labs/               @craigm26
+
+# Files that say what a result means and how the data is licensed.
+/README.md           @craigm26
+/results/README.md   @craigm26
+/LICENSE             @craigm26
+/LICENSES/           @craigm26
+/REUSE.toml          @craigm26
+/.gitattributes      @craigm26
+/.gitignore          @craigm26

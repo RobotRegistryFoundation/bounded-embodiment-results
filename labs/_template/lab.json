@@ -1,0 +1,21 @@
+{
+  "name": "Example Robotics Lab",
+  "github_handles": ["your-github-login"],
+  "affiliation": "Example University, Department of Mechanical Engineering",
+  "contact": "robot-lab@example.org",
+  "keys": [
+    {
+      "key_version": "0.1",
+      "kid": "<RFC 7638 thumbprint of public_jwk, as printed by be keygen>",
+      "alg": "Ed25519",
+      "public_jwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "<base64url Ed25519 public key, as printed by be keygen>"
+      },
+      "lab": "<lab-id: the name of this directory>",
+      "contact": "robot-lab@example.org",
+      "added": "2026-10-10"
+    }
+  ]
+}

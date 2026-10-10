@@ -1,0 +1,25 @@
+# Licensing per path (https://reuse.software). In REUSE.toml the LAST matching
+# annotation wins, so the catch-all comes first.
+version = 1
+
+# Tooling and documentation.
+[[annotations]]
+path = ["**"]
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Craig Merry and contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Submitted data and lab files: CC BY 4.0, granted by each lab through the
+# signed "license" and "rights_affirmed" fields of its report.
+[[annotations]]
+path = ["results/**", "labs/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "The lab that submitted the file (see the signer in its report.json and labs/<lab>/lab.json)"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# The maintainer's guides and template inside those directories.
+[[annotations]]
+path = ["results/README.md", "labs/README.md", "labs/_template/**"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Craig Merry and contributors"
+SPDX-License-Identifier = "CC-BY-4.0"
