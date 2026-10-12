@@ -8,7 +8,10 @@ import pytest
 
 from conftest import REPO_ROOT
 
-WORKFLOWS = sorted((REPO_ROOT / ".github" / "workflows").glob("*.yml"))
+# GitHub Actions loads both suffixes, so a .yaml workflow cannot slip past these checks.
+WORKFLOWS = sorted(
+    p for suffix in ("*.yml", "*.yaml") for p in (REPO_ROOT / ".github" / "workflows").glob(suffix)
+)
 SHA_PIN = re.compile(r"^[\w.-]+/[\w.-]+@[0-9a-f]{40}$")
 yaml = pytest.importorskip("yaml")
 
