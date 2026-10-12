@@ -134,7 +134,8 @@ def test_licences_and_reuse():
 
 
 def test_kits_lock_and_template_parse():
-    assert json.loads((REPO_ROOT / "kits.lock").read_text()) == {"bounded-embodiment": {}}
+    lock = json.loads((REPO_ROOT / "kits.lock").read_text())
+    assert list(lock) == ["bounded-embodiment"]  # only the core is pinned
     template = json.loads((REPO_ROOT / "labs" / "_template" / "lab.json").read_text())
     assert {"name", "github_handles", "affiliation", "contact", "keys"} == set(template)
 

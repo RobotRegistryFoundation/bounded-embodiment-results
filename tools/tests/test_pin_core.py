@@ -17,11 +17,21 @@ def lock(tmp_path):
     return path
 
 
-def test_the_committed_lock_is_empty_so_every_version_is_refused():
-    assert json.loads((REPO_ROOT / "kits.lock").read_text()) == {"bounded-embodiment": {}}
+#: Entries are never edited or removed, so earlier results stay checkable (README, kits.lock).
+PUBLISHED = {
+    "0.1.0": {"wheel_sha256": "eecc81ffb6867efb86d33c70cc36804dc00bdc6b778f14c35d3debf6f048e0cb", "released": "2026-10-12"},
+}
+
+
+def test_the_committed_lock_keeps_every_published_core_and_refuses_the_rest():
+    lock = json.loads((REPO_ROOT / "kits.lock").read_text())
+    for version, entry in PUBLISHED.items():
+        assert lock["bounded-embodiment"][version] == entry
     entries = pin_core.load_lock(REPO_ROOT / "kits.lock")
+    line = pin_core.requirement_line(entries, "0.1.0")
+    assert line == f"bounded-embodiment==0.1.0 --hash=sha256:{PUBLISHED['0.1.0']['wheel_sha256']}\n"
     with pytest.raises(pin_core.Refused, match="not in kits.lock"):
-        pin_core.requirement_line(entries, "0.1.0")
+        pin_core.requirement_line(entries, "0.0.9")
 
 
 def test_a_listed_version_gives_a_hash_pinned_requirement(lock):
