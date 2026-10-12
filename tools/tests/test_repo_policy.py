@@ -27,8 +27,10 @@ def steps(doc: dict):
             yield job_id, step
 
 
-def test_the_three_workflows_exist():
-    assert [w.name for w in WORKFLOWS] == ["pages.yml", "selftest.yml", "verify.yml"]
+def test_the_two_workflows_exist():
+    """No Pages workflow: robotregistryfoundation.org builds the table from main (tools/build_table.py),
+    so nothing here needs a write permission."""
+    assert [w.name for w in WORKFLOWS] == ["selftest.yml", "verify.yml"]
 
 
 @pytest.mark.parametrize("path", WORKFLOWS, ids=lambda p: p.name)
@@ -86,18 +88,11 @@ def test_every_checkout_keeps_no_credentials():
                 assert step["with"]["persist-credentials"] is False
 
 
-def test_pages_builds_and_deploys_without_committing():
-    doc = load("pages.yml")
-    text = (REPO_ROOT / ".github/workflows/pages.yml").read_text()
-    assert set(triggers(doc)) == {"push", "workflow_dispatch"}
-    assert triggers(doc)["push"]["branches"] == ["main"]
-    assert "git push" not in text and "git commit" not in text
-    assert doc["jobs"]["deploy"]["permissions"] == {"pages": "write", "id-token": "write"}
-    assert "permissions" not in doc["jobs"]["build"]
-    uses = [step.get("uses", "") for _, step in steps(doc)]
-    assert any(u.startswith("actions/upload-pages-artifact@") for u in uses)
-    assert any(u.startswith("actions/deploy-pages@") for u in uses)
-    assert "tools/build_table.py" in text
+def test_no_workflow_deploys_anything():
+    for path in WORKFLOWS:
+        text = path.read_text()
+        assert "deploy-pages" not in text and "upload-pages-artifact" not in text
+        assert "git push" not in text and "git commit" not in text
 
 
 def test_selftest_runs_pytest_on_pull_requests_that_touch_tools():
