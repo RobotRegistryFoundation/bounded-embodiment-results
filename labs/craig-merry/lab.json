@@ -1,0 +1,21 @@
+{
+  "name": "Craig Merry",
+  "github_handles": ["craigm26"],
+  "affiliation": "independent",
+  "contact": "craigm26@gmail.com",
+  "keys": [
+    {
+      "key_version": "0.1",
+      "kid": "OpOdhe3WeDVEyJLavnAjJ0LLfw7FD06fuRhA5RZgy4w",
+      "alg": "Ed25519",
+      "public_jwk": {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "x": "Cm9rd9R4hntNPTh1Xc75apOtkt4UVNGLAKq074bRw-8"
+      },
+      "lab": "craig-merry",
+      "contact": "craigm26@gmail.com",
+      "added": "2026-10-12"
+    }
+  ]
+}
