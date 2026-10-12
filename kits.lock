@@ -1,1 +1,8 @@
-{"bounded-embodiment": {}}
+{
+  "bounded-embodiment": {
+    "0.1.0": {
+      "wheel_sha256": "eecc81ffb6867efb86d33c70cc36804dc00bdc6b778f14c35d3debf6f048e0cb",
+      "released": "2026-10-12"
+    }
+  }
+}
