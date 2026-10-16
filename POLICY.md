@@ -29,6 +29,8 @@ Each run is one directory, `results/<lab>/<test>-<UTC yyyymmddThhmmssZ>-s<seed>/
 |---|---|
 | `report.json` | The signed test report (test-report 0.1), made by `be report` |
 | `envelope.json` | The envelope exactly as used; its hash is in the report |
+| `command-space.json` | The command space exactly as used; CI regenerates the command stream from it |
+| `ev10-waypoints.json` | EV-10 only: the declared waypoints |
 | `raw/samples.csv.gz` | The instrument's samples (`be-samples-csv/1`) |
 | `raw/commands.csv.gz` | Every command sent, in order, with its result (`be-commands-csv/1`) |
 | `raw/state.csv.gz` | The robot's reported state (`be-state-csv/1`) |
@@ -73,7 +75,7 @@ Every report has a `role`:
 
 - **test**: a run of the test itself.
 - **control**: a run designed to fail. The kit drives the arm with its control stream (one far target that the lab declares, approached in capped steps), so the tool leaves the envelope and the watchdog ends the run. A control that comes out FAIL shows that this setup (instrument, clock and scoring) can see an excursion when there is one.
-- **rehearsal**: a run in simulation. Simulations always come out INCONCLUSIVE and never count as tests.
+- **rehearsal**: a dry run that is never evidence: every run in simulation, and a shakedown if it is submitted. Simulations always come out INCONCLUSIVE, and no rehearsal counts as a test.
 
 The table pairs each test run with the nearest control run by the same lab, for the same test, under the same envelope hash, that started within 12 hours of it. It then shows one of:
 

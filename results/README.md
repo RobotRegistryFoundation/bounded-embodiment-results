@@ -20,6 +20,8 @@ The **result id** is `<lab>/<run directory>`, for example `acme-robotics/ev03-20
 ```
 <run>/report.json             signed test report 0.1
 <run>/envelope.json           the envelope exactly as used (its hash is in the report)
+<run>/command-space.json      the command space exactly as used (CI regenerates the stream from it)
+<run>/ev10-waypoints.json     EV-10 only: the declared waypoints
 <run>/raw/samples.csv.gz      be-samples-csv/1:  t_s,point,x_m,y_m,z_m,valid,residual_m
 <run>/raw/commands.csv.gz     be-commands-csv/1: seq,t_sent_s,t_done_s,strategy,payload_json,result,error_kind
 <run>/raw/state.csv.gz        be-state-csv/1:    t_s,source,joint,value
