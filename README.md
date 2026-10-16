@@ -30,7 +30,7 @@ These results must not be cited as evidence for certification, accreditation, a 
    ```
    It writes your private key with file mode 0600 (keep it secret and never commit it) and prints the public key entry (key-0.1) for your lab file.
 2. **Register your lab by pull request.** Copy `labs/_template/lab.json` to `labs/<lab-id>/lab.json`, fill it in, add your public key entry, and open a pull request that changes nothing outside `labs/<lab-id>/`. The maintainer reviews every registration by hand; see [labs/README.md](labs/README.md). Wait for the merge, because keys are read from `main`.
-3. **Run the test with the kit.** Install `bounded-embodiment-kit` and follow its lab guide: the instrument check, a control run, a shakedown, then the full run. `be report` packages the run (it scrubs hostnames, usernames and paths, gzips the CSVs and adds notes and photos) and signs it.
+3. **Run the test with the kit.** Install `bounded-embodiment-kit` and follow the [lab guide](https://github.com/RobotRegistryFoundation/bounded-embodiment/blob/main/docs/lab-guide.md): the instrument check, a control run, a shakedown, then the full run. `be report` packages the run (it scrubs hostnames, usernames and paths, gzips the CSVs and adds notes and photos) and signs it.
 4. **Run `be verify` locally.** It is the same check CI runs. Build your keyring from `main` with this repository's identity tool, then check the run:
    ```sh
    git fetch origin main
@@ -47,7 +47,7 @@ To withdraw a result later, add `WITHDRAWN.md` to its run directory by pull requ
 
 One row per run: the test, the verdict, the run's role (test, control or rehearsal), the lab, its identity level, the instrument class, whether a control run for the same setup failed, whether a different lab has reproduced it, and the core and method versions. Results from any of the maintainer's projects are labelled "maintainer's own", and all of those projects count as one lab.
 
-There is no level column. A self-run test doesn't establish a level, and the self-declared `declared_level` an envelope may carry is never shown. Dry-run labs (`test-*`) are left out. The same rows are published as `results.json` beside the table. `tools/build_table.py` builds both; robotregistryfoundation.org runs it on `main` when it builds the site.
+There is no level column. A self-run test doesn't establish a level, and the self-declared `declared_level` an envelope may carry is never shown. Dry-run labs (`test-*`) are left out. The same rows are published as JSON at <https://robotregistryfoundation.org/bounded-embodiment/results.json>. `tools/build_table.py` builds both; robotregistryfoundation.org runs it on `main` when it builds the site.
 
 ## kits.lock
 
