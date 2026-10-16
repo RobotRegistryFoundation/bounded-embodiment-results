@@ -1,4 +1,4 @@
-# Built by tools/build_table.py; published by the pages workflow, never committed.
+# Built by tools/build_table.py (robotregistryfoundation.org runs it on main); never committed.
 site/
 __pycache__/
 .pytest_cache/

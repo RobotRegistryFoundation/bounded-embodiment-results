@@ -1,6 +1,6 @@
 # Bounded Embodiment results
 
-Signed reports from labs that ran a [Bounded Embodiment](https://github.com/RobotRegistryFoundation/bounded-embodiment) test on their own machines, submitted here by pull request. The results table is built from `main` and published at <https://robotregistryfoundation.github.io/bounded-embodiment-results/>.
+Signed reports from labs that ran a [Bounded Embodiment](https://github.com/RobotRegistryFoundation/bounded-embodiment) test on their own machines, submitted here by pull request. The results table is built from `main` and published at <https://robotregistryfoundation.org/bounded-embodiment/results/>.
 
 Every result is **self-run**: the lab that submitted it ran the test, measured it and signed the report. A result counts as reproduced only when a different lab reproduces it. The rules are in [POLICY.md](POLICY.md).
 
@@ -39,7 +39,7 @@ These results must not be cited as evidence for certification, accreditation, a 
    ```
 5. **Run `be submit`.** It runs the core check again, enforces the size limits, refuses simulations unless their role is `rehearsal`, refuses unreleased core versions, copies the run into `results/<lab-id>/<run>/` in your clone of this repository, and prints the `gh pr create` command.
 6. **Open the pull request.** Change nothing outside `results/<lab-id>/`. CI runs the path guard, the identity check, `be verify` under the core version your report names (installed from PyPI and checked against the hash in `kits.lock`) and the claim-language lint. Workflows from first-time contributors wait until the maintainer allows them to run.
-7. **After the merge, the table updates.** The `pages` workflow rebuilds the table from `main`. Nothing is committed back.
+7. **After the merge, the table updates.** robotregistryfoundation.org runs `tools/build_table.py` on `main` each time the site is built, at least hourly. Nothing is committed back.
 
 To withdraw a result later, add `WITHDRAWN.md` to its run directory by pull request; see [POLICY.md](POLICY.md#permanence-and-withdrawal).
 
@@ -47,7 +47,7 @@ To withdraw a result later, add `WITHDRAWN.md` to its run directory by pull requ
 
 One row per run: the test, the verdict, the run's role (test, control or rehearsal), the lab, its identity level, the instrument class, whether a control run for the same setup failed, whether a different lab has reproduced it, and the core and method versions. Results from any of the maintainer's projects are labelled "maintainer's own", and all of those projects count as one lab.
 
-There is no level column. A self-run test doesn't establish a level, and the self-declared `declared_level` an envelope may carry is never shown. Dry-run labs (`test-*`) are left out. The same rows are published as `results.json` beside the table.
+There is no level column. A self-run test doesn't establish a level, and the self-declared `declared_level` an envelope may carry is never shown. Dry-run labs (`test-*`) are left out. The same rows are published as `results.json` beside the table. `tools/build_table.py` builds both; robotregistryfoundation.org runs it on `main` when it builds the site.
 
 ## kits.lock
 
@@ -87,7 +87,7 @@ All checking of reports lives in the pinned core wheel (`be verify`); the workfl
 
 ## How this repository is protected
 
-- Workflows run on `pull_request`, never `pull_request_target`, with `permissions: contents: read` and no secrets. The Pages deploy job, which runs only for `main`, also has `pages: write` and `id-token: write`, because `actions/deploy-pages` needs them.
+- Workflows run on `pull_request`, never `pull_request_target`, with `permissions: contents: read` and no secrets. This repository publishes nothing itself: the table is built by the robotregistryfoundation.org site from `main`.
 - A `pull_request` run uses the workflow file from the pull request itself, so CI cannot protect the CI. Review does. [`.github/CODEOWNERS`](.github/CODEOWNERS) puts `.github/`, `tools/`, `kits.lock`, `POLICY.md`, `CODEOWNERS` and `labs/` under the maintainer's review. Branch protection requires that review and the `submission-consistency` check, and the maintainer merges a result pull request only when every changed path is inside `results/<lab>/`.
 - Every verify job runs the tools, `kits.lock` and the claim-word list from `main`, not from the pull request. A pull request that edits only `tools/` therefore can't change what is checked. One that edits a workflow can, which is why workflow changes need the maintainer's review.
 - Pull requests that change anything outside `results/` and `labs/` fail the path guard by design. The maintainer reviews and merges them by hand.
