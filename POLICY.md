@@ -111,3 +111,5 @@ Craig Merry maintains the method, the core package, the kit and this repository.
 ## Changes to this policy
 
 Changes are made by pull request and reviewed by the maintainer, and the history is public. A change applies to submissions made after it is merged.
+
+[GOVERNANCE.md](https://github.com/RobotRegistryFoundation/bounded-embodiment/blob/main/GOVERNANCE.md) in bounded-embodiment says who decides changes to this policy, and it governs where the two differ.
