@@ -6,7 +6,7 @@ CI cannot check that the data came from the robot described, or that the envelop
 
 ## Not certification evidence
 
-Results here are not certification evidence and must not be cited as such. Don't cite them as evidence for certification, accreditation, conformity assessment, a registry tier (including any tier in the Robot Registry Foundation registry), a procurement qualification or a regulatory filing.
+Results here are not certification evidence and must not be cited as such. Don't cite them as evidence for certification, accreditation, conformity assessment, a claim of conformity with a standard, a regulatory claim or filing, a registry tier (including any tier in the Robot Registry Foundation registry), a procurement qualification, or a claim that a machine or a use meets a provider's usage policy.
 
 A result may be cited for what it is: a self-run measurement, with illustrative thresholds, whose verdict follows from its submitted data under the stated core version. Give the result id and link to its run directory.
 
